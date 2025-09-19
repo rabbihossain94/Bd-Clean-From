@@ -4,106 +4,458 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BD Clean Jurain - Admin Panel</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
+    :root {
+      --primary: #00695c;
+      --secondary: #4db6ac;
+      --success: #2e7d32;
+      --warning: #ff9800;
+      --danger: #d32f2f;
+      --info: #1976d2;
+      --dark: #333;
+      --light: #f8f9fa;
+      --gray: #6c757d;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       margin: 0;
       padding: 0;
       background: #f4f6f9;
+      color: #333;
+      line-height: 1.6;
     }
+    
+    /* Header Styles */
     header {
-      background: #00695c;
+      background: var(--primary);
       color: #fff;
-      padding: 15px;
-      text-align: center;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-    header h1 {
+    
+    .header-left h1 {
       margin: 0;
       font-size: 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    header p {
-      margin: 5px 0;
+    
+    .header-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 5px;
       font-size: 14px;
     }
+    
+    /* Dashboard Stats */
+    .dashboard-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px;
+    }
+    
+    .stat-card {
+      background: white;
+      border-radius: 8px;
+      padding: 15px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .stat-card i {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    
+    .stat-card.total i { color: var(--primary); }
+    .stat-card.pending i { color: var(--warning); }
+    .stat-card.approved i { color: var(--success); }
+    .stat-card.rejected i { color: var(--danger); }
+    
+    .stat-card h3 {
+      font-size: 28px;
+      margin: 5px 0;
+    }
+    
+    .stat-card p {
+      color: var(--gray);
+      font-size: 14px;
+    }
+    
+    /* Filter and Search */
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin: 0 20px 20px;
+      align-items: center;
+    }
+    
+    .search-box {
+      position: relative;
+      flex: 1;
+      min-width: 250px;
+    }
+    
+    .search-box input {
+      width: 100%;
+      padding: 10px 15px 10px 40px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    .search-box i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--gray);
+    }
+    
+    .filter-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    
+    .filter-btn {
+      padding: 8px 15px;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+    
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    
+    /* Table Styles */
     .container {
       width: 95%;
-      max-width: 1200px;
-      margin: 20px auto;
+      max-width: 1400px;
+      margin: 0 auto 30px;
       background: #fff;
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      overflow-x: auto;
     }
+    
     table {
       width: 100%;
       border-collapse: collapse;
     }
+    
     table th, table td {
       border: 1px solid #ddd;
-      padding: 10px;
+      padding: 12px;
       text-align: center;
     }
+    
     table th {
-      background: #00695c;
+      background: var(--primary);
       color: #fff;
+      position: sticky;
+      top: 0;
     }
+    
+    table tr:nth-child(even) {
+      background: #f9f9f9;
+    }
+    
+    /* Status Colors */
+    .pending { background: #fff3cd; color: #856404; }
+    .approved { background: #d4edda; color: #155724; }
+    .hold { background: #e2e3e5; color: #383d41; }
+    .rejected { background: #f8d7da; color: #721c24; }
+    .edited { background: #cce5ff; color: #004085; }
+    
+    /* Action Buttons */
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 5px;
+      flex-wrap: wrap;
+    }
+    
     button {
-      margin: 2px;
       padding: 6px 10px;
       border: none;
       border-radius: 4px;
       cursor: pointer;
       color: #fff;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 5px;
     }
-    .approve { background: #2e7d32; }
-    .hold { background: #ff9800; }
-    .reject { background: #d32f2f; }
-    .edit { background: #1976d2; }
-    .delete { background: #616161; }
-    #editModal {
+    
+    .approve { background: var(--success); }
+    .approve:hover { background: #1b5e20; }
+    
+    .hold { background: var(--warning); }
+    .hold:hover { background: #f57c00; }
+    
+    .reject { background: var(--danger); }
+    .reject:hover { background: #c62828; }
+    
+    .edit { background: var(--info); }
+    .edit:hover { background: #1565c0; }
+    
+    .delete { background: var(--gray); }
+    .delete:hover { background: #495057; }
+    
+    /* Modal Styles */
+    .modal {
       display: none;
       position: fixed;
-      left: 0; top: 0;
-      width: 100%; height: 100%;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
       background: rgba(0,0,0,0.6);
       justify-content: center;
       align-items: center;
+      z-index: 1000;
     }
-    #editModal .modal-content {
+    
+    .modal-content {
       background: #fff;
-      padding: 20px;
+      padding: 25px;
       border-radius: 8px;
-      width: 400px;
+      width: 450px;
       max-width: 90%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     }
-    #editModal input {
-      width: 100%;
-      padding: 8px;
-      margin: 5px 0;
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
     }
-    #editModal button {
+    
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--gray);
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    
+    .form-group input {
       width: 100%;
-      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+    
+    .modal-actions button {
+      flex: 1;
+      padding: 10px;
+    }
+    
+    .btn-cancel {
+      background: var(--gray);
+    }
+    
+    .btn-save {
+      background: var(--success);
+    }
+    
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #333;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 4px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      z-index: 1000;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s;
+    }
+    
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    .toast.warning { background: var(--warning); }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+      }
+      
+      .header-right {
+        align-items: flex-start;
+      }
+      
+      .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      table th, table td {
+        padding: 8px 5px;
+        font-size: 14px;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .dashboard-stats {
+        grid-template-columns: 1fr;
+      }
+      
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .filter-buttons {
+        justify-content: center;
+      }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>BD Clean Jurain - Admin Panel</h1>
-    <p id="dateTime"></p>
-    <p id="ipAddress"></p>
+    <div class="header-left">
+      <h1><i class="fas fa-broom"></i> BD Clean Jurain - Admin Panel</h1>
+    </div>
+    <div class="header-right">
+      <p id="dateTime"></p>
+      <p id="ipAddress"></p>
+      <p id="userCount">Total Users: 0</p>
+    </div>
   </header>
 
+  <!-- Dashboard Stats -->
+  <div class="dashboard-stats">
+    <div class="stat-card total">
+      <i class="fas fa-users"></i>
+      <h3 id="totalUsers">0</h3>
+      <p>Total Users</p>
+    </div>
+    <div class="stat-card pending">
+      <i class="fas fa-clock"></i>
+      <h3 id="pendingUsers">0</h3>
+      <p>Pending</p>
+    </div>
+    <div class="stat-card approved">
+      <i class="fas fa-check-circle"></i>
+      <h3 id="approvedUsers">0</h3>
+      <p>Approved</p>
+    </div>
+    <div class="stat-card rejected">
+      <i class="fas fa-times-circle"></i>
+      <h3 id="rejectedUsers">0</h3>
+      <p>Rejected</p>
+    </div>
+  </div>
+
+  <!-- Filter and Search Controls -->
+  <div class="controls">
+    <div class="search-box">
+      <i class="fas fa-search"></i>
+      <input type="text" id="searchInput" placeholder="Search users...">
+    </div>
+    <div class="filter-buttons">
+      <button class="filter-btn active" data-filter="all">
+        <i class="fas fa-layer-group"></i> All
+      </button>
+      <button class="filter-btn" data-filter="pending">
+        <i class="fas fa-clock"></i> Pending
+      </button>
+      <button class="filter-btn" data-filter="approved">
+        <i class="fas fa-check-circle"></i> Approved
+      </button>
+      <button class="filter-btn" data-filter="rejected">
+        <i class="fas fa-times-circle"></i> Rejected
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
   <div class="container">
     <table id="userTable">
       <thead>
         <tr>
+          <th>ID</th>
           <th>Name</th>
           <th>Phone</th>
-          <th>Gmail</th>
+          <th>Email</th>
           <th>Area</th>
           <th>Word</th>
           <th>Photo</th>
+          <th>Status</th>
+          <th>Registration Date</th>
           <th>Actions</th>
         </tr>
       </thead>
@@ -112,129 +464,335 @@
   </div>
 
   <!-- Edit Modal -->
-  <div id="editModal">
+  <div id="editModal" class="modal">
     <div class="modal-content">
-      <h3>Edit User</h3>
-      <input type="text" id="editName" placeholder="Name">
-      <input type="text" id="editPhone" placeholder="Phone">
-      <input type="text" id="editGmail" placeholder="Gmail">
-      <input type="text" id="editArea" placeholder="Area">
-      <input type="text" id="editWord" placeholder="Word Number">
-      <input type="text" id="editPhoto" placeholder="Photo URL">
-      <button onclick="saveEdit()">Save</button>
-      <button onclick="closeModal()">Cancel</button>
+      <div class="modal-header">
+        <h3>Edit User</h3>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <div class="form-group">
+        <label for="editName">Name</label>
+        <input type="text" id="editName" placeholder="Name">
+      </div>
+      <div class="form-group">
+        <label for="editPhone">Phone</label>
+        <input type="text" id="editPhone" placeholder="Phone">
+      </div>
+      <div class="form-group">
+        <label for="editGmail">Email</label>
+        <input type="text" id="editGmail" placeholder="Email">
+      </div>
+      <div class="form-group">
+        <label for="editArea">Area</label>
+        <input type="text" id="editArea" placeholder="Area">
+      </div>
+      <div class="form-group">
+        <label for="editWord">Word Number</label>
+        <input type="text" id="editWord" placeholder="Word Number">
+      </div>
+      <div class="form-group">
+        <label for="editPhoto">Photo URL</label>
+        <input type="text" id="editPhoto" placeholder="Photo URL">
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-save" onclick="saveEdit()">Save Changes</button>
+      </div>
     </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="toast">
+    <i id="toast-icon"></i>
+    <span id="toast-message"></span>
   </div>
 
   <script>
     let users = JSON.parse(localStorage.getItem("users")) || [];
     let editIndex = null;
+    let currentFilter = "all";
+    let searchQuery = "";
 
     const BOT_TOKEN = "7757315317:AAHhlhX7UwuOnqSGE7C3PihIJCN-d_Gpbc4";
     const CHAT_ID = "-4970599148";
 
-    // Date, Time & IP Show
+    // Initialize the application
+    function init() {
+      updateDateTime();
+      setInterval(updateDateTime, 1000);
+      
+      fetchIPAddress();
+      renderTable();
+      updateStats();
+      setupEventListeners();
+    }
+
+    // Update date and time
     function updateDateTime() {
       const now = new Date();
-      document.getElementById("dateTime").innerText =
-        "📅 " + now.toLocaleDateString() + " ⏰ " + now.toLocaleTimeString();
+      document.getElementById("dateTime").innerHTML = 
+        `<i class="fas fa-calendar-alt"></i> ${now.toLocaleDateString()} <i class="fas fa-clock"></i> ${now.toLocaleTimeString()}`;
     }
-    setInterval(updateDateTime, 1000);
-    updateDateTime();
 
-    fetch("https://api.ipify.org?format=json")
-      .then(res => res.json())
-      .then(data => document.getElementById("ipAddress").innerText = "🌐 IP: " + data.ip);
+    // Fetch IP address
+    function fetchIPAddress() {
+      fetch("https://api.ipify.org?format=json")
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById("ipAddress").innerHTML = `<i class="fas fa-globe"></i> IP: ${data.ip}`;
+        })
+        .catch(() => {
+          document.getElementById("ipAddress").innerHTML = `<i class="fas fa-globe"></i> IP: Unable to fetch`;
+        });
+    }
 
+    // Set up event listeners
+    function setupEventListeners() {
+      // Search functionality
+      document.getElementById("searchInput").addEventListener("input", function(e) {
+        searchQuery = e.target.value.toLowerCase();
+        renderTable();
+      });
+
+      // Filter functionality
+      document.querySelectorAll(".filter-btn").forEach(button => {
+        button.addEventListener("click", function() {
+          document.querySelectorAll(".filter-btn").forEach(btn => btn.classList.remove("active"));
+          this.classList.add("active");
+          currentFilter = this.dataset.filter;
+          renderTable();
+        });
+      });
+    }
+
+    // Render the user table
     function renderTable() {
       const tbody = document.querySelector("#userTable tbody");
       tbody.innerHTML = "";
-      users.forEach((u, i) => {
+      
+      // Filter and search users
+      const filteredUsers = users.filter(user => {
+        const matchesFilter = currentFilter === "all" || user.status.toLowerCase() === currentFilter;
+        const matchesSearch = 
+          user.name.toLowerCase().includes(searchQuery) ||
+          user.phone.toLowerCase().includes(searchQuery) ||
+          user.email.toLowerCase().includes(searchQuery) ||
+          user.area.toLowerCase().includes(searchQuery) ||
+          user.word.toLowerCase().includes(searchQuery);
+        
+        return matchesFilter && matchesSearch;
+      });
+
+      if (filteredUsers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center;">No users found</td></tr>`;
+        return;
+      }
+
+      filteredUsers.forEach((u, i) => {
+        const originalIndex = users.findIndex(user => user.id === u.id);
+        
+        // Determine which action buttons to show based on status
+        let actionButtons = '';
+        if (u.status === 'Approved') {
+          actionButtons = `
+            <button class="edit" onclick="openEdit(${originalIndex})"><i class="fas fa-edit"></i> Edit</button>
+          `;
+        } else {
+          actionButtons = `
+            <button class="approve" onclick="changeStatus(${originalIndex}, 'Approved')"><i class="fas fa-check"></i> Approve</button>
+            <button class="hold" onclick="changeStatus(${originalIndex}, 'Hold')"><i class="fas fa-pause"></i> Hold</button>
+            <button class="edit" onclick="openEdit(${originalIndex})"><i class="fas fa-edit"></i> Edit</button>
+            <button class="reject" onclick="changeStatus(${originalIndex}, 'Rejected')"><i class="fas fa-times"></i> Reject</button>
+            <button class="delete" onclick="deleteUser(${originalIndex})"><i class="fas fa-trash"></i> Delete</button>
+          `;
+        }
+        
         tbody.innerHTML += `
-          <tr>
+          <tr class="${u.status.toLowerCase()}">
+            <td>${u.id || originalIndex + 1}</td>
             <td>${u.name}</td>
             <td>${u.phone}</td>
-            <td>${u.gmail}</td>
+            <td>${u.email}</td>
             <td>${u.area}</td>
             <td>${u.word}</td>
-            <td><img src="${u.photo}" width="50" height="50"></td>
+            <td><img src="${u.photo}" width="50" height="50" style="border-radius: 50%; object-fit: cover;"></td>
+            <td><span class="status-badge">${u.status}</span></td>
+            <td>${u.date || "N/A"}</td>
             <td>
-              <button class="approve" onclick="sendAction(${i}, 'Approved ✅')">✅</button>
-              <button class="hold" onclick="sendAction(${i}, 'On Hold ⏸')">⏸</button>
-              <button class="edit" onclick="openEdit(${i})">✏️</button>
-              <button class="reject" onclick="sendAction(${i}, 'Rejected ❌')">❌</button>
-              <button class="delete" onclick="deleteUser(${i})">🗑</button>
+              <div class="action-buttons">
+                ${actionButtons}
+              </div>
             </td>
           </tr>`;
       });
     }
 
+    // Update dashboard statistics
+    function updateStats() {
+      const total = users.length;
+      const pending = users.filter(u => u.status === "Pending").length;
+      const approved = users.filter(u => u.status === "Approved").length;
+      const rejected = users.filter(u => u.status === "Rejected").length;
+      
+      document.getElementById("totalUsers").textContent = total;
+      document.getElementById("pendingUsers").textContent = pending;
+      document.getElementById("approvedUsers").textContent = approved;
+      document.getElementById("rejectedUsers").textContent = rejected;
+      document.getElementById("userCount").textContent = `Total Users: ${total}`;
+    }
+
+    // Show toast notification
+    function showToast(message, type = "success") {
+      const toast = document.getElementById("toast");
+      const toastIcon = document.getElementById("toast-icon");
+      const toastMessage = document.getElementById("toast-message");
+      
+      // Set icon based on type
+      if (type === "success") {
+        toastIcon.className = "fas fa-check-circle";
+      } else if (type === "error") {
+        toastIcon.className = "fas fa-exclamation-circle";
+      } else if (type === "warning") {
+        toastIcon.className = "fas fa-exclamation-triangle";
+      }
+      
+      toastMessage.textContent = message;
+      toast.className = `toast ${type} show`;
+      
+      // Hide after 3 seconds
+      setTimeout(() => {
+        toast.className = "toast";
+      }, 3000);
+    }
+
+    // Send message to Telegram
     function sendTelegram(msg) {
+      if (!BOT_TOKEN || !CHAT_ID || BOT_TOKEN === "YOUR_BOT_TOKEN") {
+        console.log("Telegram bot not configured");
+        return;
+      }
+      
       fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({chat_id: CHAT_ID, text: msg})
-      });
+        body: JSON.stringify({chat_id: CHAT_ID, text: msg, parse_mode: "Markdown"})
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (!data.ok) {
+          console.error("Telegram API error:", data);
+        }
+      })
+      .catch(error => console.error("Error sending to Telegram:", error));
     }
 
-    function sendAction(i, status) {
+    // Change user status
+    function changeStatus(i, status) {
+      if (i < 0 || i >= users.length) return;
+      
       const u = users[i];
+      const prevStatus = u.status;
+      u.status = status;
+      
+      // Add status change history if it doesn't exist
+      if (!u.statusHistory) {
+        u.statusHistory = [];
+      }
+      
+      u.statusHistory.push({
+        from: prevStatus,
+        to: status,
+        date: new Date().toLocaleString()
+      });
+      
+      localStorage.setItem("users", JSON.stringify(users));
+
       const now = new Date();
       const message = `
-📢 *BD Clean Jurain Update*
+📢 *BD Clean Jurain - Status Update*
 👤 Name: ${u.name}
 📱 Phone: ${u.phone}
-📧 Gmail: ${u.gmail}
+📧 Email: ${u.email}
 📍 Area: ${u.area}
 🏘 Word: ${u.word}
+🔄 Status: ${prevStatus} → ${status}
 📅 Date: ${now.toLocaleDateString()}
 ⏰ Time: ${now.toLocaleTimeString()}
-🌐 IP: ${document.getElementById("ipAddress").innerText}
-⚡ Status: ${status}`;
+      `;
+      
       sendTelegram(message);
+      renderTable();
+      updateStats();
+      showToast(`Status changed to ${status} for ${u.name}`, "success");
     }
 
+    // Open edit modal
     function openEdit(i) {
+      if (i < 0 || i >= users.length) return;
+      
       editIndex = i;
       const u = users[i];
+      
       document.getElementById("editName").value = u.name;
       document.getElementById("editPhone").value = u.phone;
-      document.getElementById("editGmail").value = u.gmail;
+      document.getElementById("editGmail").value = u.email;
       document.getElementById("editArea").value = u.area;
       document.getElementById("editWord").value = u.word;
       document.getElementById("editPhoto").value = u.photo;
+      
       document.getElementById("editModal").style.display = "flex";
     }
 
+    // Save edited user data
     function saveEdit() {
-      if (editIndex !== null) {
-        users[editIndex] = {
-          name: document.getElementById("editName").value,
-          phone: document.getElementById("editPhone").value,
-          gmail: document.getElementById("editGmail").value,
-          area: document.getElementById("editArea").value,
-          word: document.getElementById("editWord").value,
-          photo: document.getElementById("editPhoto").value
-        };
-        localStorage.setItem("users", JSON.stringify(users));
-        sendAction(editIndex, "Edited ✏️");
-        renderTable();
-        closeModal();
-      }
+      if (editIndex === null) return;
+      
+      users[editIndex] = {
+        ...users[editIndex],
+        name: document.getElementById("editName").value,
+        phone: document.getElementById("editPhone").value,
+        email: document.getElementById("editGmail").value,
+        area: document.getElementById("editArea").value,
+        word: document.getElementById("editWord").value,
+        photo: document.getElementById("editPhoto").value,
+        status: "Edited"
+      };
+      
+      localStorage.setItem("users", JSON.stringify(users));
+      
+      sendTelegram(`✏️ User Edited: ${users[editIndex].name}`);
+      renderTable();
+      updateStats();
+      closeModal();
+      showToast("User information updated successfully", "success");
     }
 
+    // Close modal
     function closeModal() {
       document.getElementById("editModal").style.display = "none";
+      editIndex = null;
     }
 
+    // Delete user
     function deleteUser(i) {
-      sendAction(i, "Deleted 🗑");
+      if (i < 0 || i >= users.length) return;
+      
+      if (!confirm(`Are you sure you want to delete ${users[i].name}?`)) {
+        return;
+      }
+      
+      const u = users[i];
+      sendTelegram(`🗑 Deleted User: ${u.name}`);
       users.splice(i, 1);
       localStorage.setItem("users", JSON.stringify(users));
+      
       renderTable();
+      updateStats();
+      showToast("User deleted successfully", "success");
     }
 
-    renderTable();
+    // Initialize the application
+    init();
   </script>
 </body>
 </html>
