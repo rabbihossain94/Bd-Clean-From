@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Registration - BD Clean Jurain</title>
+  <style>
+    body { 
+    font-family: Arial, sans-serif; 
+    margin:0; 
+    display:flex; 
+    justify-content:center; 
+    align-items:center; 
+    height:100vh; 
+    background:linear-gradient(135deg,#4facfe,#00f2fe);
+    }
+    
+    .form-container { 
+    background:#fff; 
+    padding:25px; 
+    border-radius:15px; 
+    box-shadow:0 6px 15px rgba(0,0,0,0.2); 
+    width:100%; 
+    max-width:450px;
+    }
+    
+    .form-container h2 { 
+    text-align:center; 
+    margin-bottom:15px; 
+    }
+    
+    .form-group { 
+    margin-bottom:12px; 
+    }
+    
+    label { 
+    display:block; 
+    margin-bottom:5px; 
+    font-weight:bold; 
+    }
+    
+    input { 
+    width:100%; 
+    padding:10px; 
+    border:1px solid #ccc; 
+    border-radius:8px; 
+    }
+    
+    button { 
+    width:100%; 
+    padding:12px; 
+    background:#28a745; 
+    color:#fff; 
+    border:none; 
+    border-radius:8px; 
+    font-size:16px; 
+    cursor:pointer; 
+    }
+    
+    button:hover { 
+    background:#218838; 
+    }
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h2>📝 BD Clean Jurain</h2>
+    <form id="userForm">
+      <div class="form-group">
+        <label>পূর্ণ নাম:</label>
+        <input type="text" id="name" required>
+    </div>
+      <div class="form-group">
+        <label>ফোন নম্বর:</label>
+        <input type="tel" id="phone" required>
+    </div>
+      <div class="form-group">
+        <label>ইমেইল:</label>
+        <input type="email" id="email" required>
+    </div>
+    <div class="form-group">
+        <label>Facebook Link</label>
+        <input type="text" id="Link" required>
+    </div>
+      <div class="form-group">
+        <label>এলাকার নাম:</label>
+        <input type="text" id="area" required>
+    </div>
+      <div class="form-group">
+        <label>Word নম্বর:</label>
+        <input type="text" id="word" required>
+    </div>
+      <div class="form-group">
+        <label>প্রোফাইল ছবি:</label>
+        <input type="file" id="photo" accept="image/*" required>
+    </div>
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+
+<script>
+  const BOT_TOKEN = "7757315317:AAHhlhX7UwuOnqSGE7C3PihIJCN-d_Gpbc4";
+  const CHAT_ID = "-4940703054";
+
+  async function getIP() {
+    try {
+      let res = await fetch("https://api.ipify.org?format=json");
+      let data = await res.json();
+      return data.ip;
+    } catch {
+      return "Unknown";
+    }
+  }
+
+  document.getElementById("userForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+
+    let name = document.getElementById("name").value;
+    let phone = document.getElementById("phone").value;
+    let email = document.getElementById("email").value;
+    let area = document.getElementById("area").value;
+    let word = document.getElementById("word").value;
+    let photoFile = document.getElementById("photo").files[0];
+
+    let reader = new FileReader();
+    reader.onload = async function(event){
+      let photo = event.target.result;
+      let ip = await getIP();
+      let date = new Date();
+      let user = {name, phone, email, area, word, photo, ip, date:date.toLocaleDateString(), time:date.toLocaleTimeString()};
+
+      let users = JSON.parse(localStorage.getItem("users")) || [];
+      users.push(user);
+      localStorage.setItem("users", JSON.stringify(users));
+
+      // Send Telegram message
+      let text = `📌 নতুন ইউজার রেজিস্ট্রেশন\n\n👤 নাম: ${name}\n📞 ফোন: ${phone}\n📧 ইমেইল: ${email}\n📍 এলাকা: ${area}\n🏠 Word No: ${word}\n🌐 IP: ${ip}\n📅 তারিখ: ${user.date}\n⏰ সময়: ${user.time}`;
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({chat_id:CHAT_ID,text})
+      });
+
+      alert("✅ ফর্ম সাবমিট হয়েছে!");
+      e.target.reset();
+    };
+    reader.readAsDataURL(photoFile);
+  });
+</script>
+</body>
+</html>

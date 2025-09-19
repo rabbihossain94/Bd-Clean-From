@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BD Clean Jurain - Admin Panel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f4f6f9;
+    }
+    header {
+      background: #00695c;
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 22px;
+    }
+    header p {
+      margin: 5px 0;
+      font-size: 14px;
+    }
+    .container {
+      width: 95%;
+      max-width: 1200px;
+      margin: 20px auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table th, table td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    table th {
+      background: #00695c;
+      color: #fff;
+    }
+    button {
+      margin: 2px;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: #fff;
+    }
+    .approve { background: #2e7d32; }
+    .hold { background: #ff9800; }
+    .reject { background: #d32f2f; }
+    .edit { background: #1976d2; }
+    .delete { background: #616161; }
+    #editModal {
+      display: none;
+      position: fixed;
+      left: 0; top: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+    }
+    #editModal .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      width: 400px;
+      max-width: 90%;
+    }
+    #editModal input {
+      width: 100%;
+      padding: 8px;
+      margin: 5px 0;
+    }
+    #editModal button {
+      width: 100%;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>BD Clean Jurain - Admin Panel</h1>
+    <p id="dateTime"></p>
+    <p id="ipAddress"></p>
+  </header>
+
+  <div class="container">
+    <table id="userTable">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Phone</th>
+          <th>Gmail</th>
+          <th>Area</th>
+          <th>Word</th>
+          <th>Photo</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Edit Modal -->
+  <div id="editModal">
+    <div class="modal-content">
+      <h3>Edit User</h3>
+      <input type="text" id="editName" placeholder="Name">
+      <input type="text" id="editPhone" placeholder="Phone">
+      <input type="text" id="editGmail" placeholder="Gmail">
+      <input type="text" id="editArea" placeholder="Area">
+      <input type="text" id="editWord" placeholder="Word Number">
+      <input type="text" id="editPhoto" placeholder="Photo URL">
+      <button onclick="saveEdit()">Save</button>
+      <button onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    let users = JSON.parse(localStorage.getItem("users")) || [];
+    let editIndex = null;
+
+    const BOT_TOKEN = "7757315317:AAHhlhX7UwuOnqSGE7C3PihIJCN-d_Gpbc4";
+    const CHAT_ID = "-4970599148";
+
+    // Date, Time & IP Show
+    function updateDateTime() {
+      const now = new Date();
+      document.getElementById("dateTime").innerText =
+        "📅 " + now.toLocaleDateString() + " ⏰ " + now.toLocaleTimeString();
+    }
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+    fetch("https://api.ipify.org?format=json")
+      .then(res => res.json())
+      .then(data => document.getElementById("ipAddress").innerText = "🌐 IP: " + data.ip);
+
+    function renderTable() {
+      const tbody = document.querySelector("#userTable tbody");
+      tbody.innerHTML = "";
+      users.forEach((u, i) => {
+        tbody.innerHTML += `
+          <tr>
+            <td>${u.name}</td>
+            <td>${u.phone}</td>
+            <td>${u.gmail}</td>
+            <td>${u.area}</td>
+            <td>${u.word}</td>
+            <td><img src="${u.photo}" width="50" height="50"></td>
+            <td>
+              <button class="approve" onclick="sendAction(${i}, 'Approved ✅')">✅</button>
+              <button class="hold" onclick="sendAction(${i}, 'On Hold ⏸')">⏸</button>
+              <button class="edit" onclick="openEdit(${i})">✏️</button>
+              <button class="reject" onclick="sendAction(${i}, 'Rejected ❌')">❌</button>
+              <button class="delete" onclick="deleteUser(${i})">🗑</button>
+            </td>
+          </tr>`;
+      });
+    }
+
+    function sendTelegram(msg) {
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({chat_id: CHAT_ID, text: msg})
+      });
+    }
+
+    function sendAction(i, status) {
+      const u = users[i];
+      const now = new Date();
+      const message = `
+📢 *BD Clean Jurain Update*
+👤 Name: ${u.name}
+📱 Phone: ${u.phone}
+📧 Gmail: ${u.gmail}
+📍 Area: ${u.area}
+🏘 Word: ${u.word}
+📅 Date: ${now.toLocaleDateString()}
+⏰ Time: ${now.toLocaleTimeString()}
+🌐 IP: ${document.getElementById("ipAddress").innerText}
+⚡ Status: ${status}`;
+      sendTelegram(message);
+    }
+
+    function openEdit(i) {
+      editIndex = i;
+      const u = users[i];
+      document.getElementById("editName").value = u.name;
+      document.getElementById("editPhone").value = u.phone;
+      document.getElementById("editGmail").value = u.gmail;
+      document.getElementById("editArea").value = u.area;
+      document.getElementById("editWord").value = u.word;
+      document.getElementById("editPhoto").value = u.photo;
+      document.getElementById("editModal").style.display = "flex";
+    }
+
+    function saveEdit() {
+      if (editIndex !== null) {
+        users[editIndex] = {
+          name: document.getElementById("editName").value,
+          phone: document.getElementById("editPhone").value,
+          gmail: document.getElementById("editGmail").value,
+          area: document.getElementById("editArea").value,
+          word: document.getElementById("editWord").value,
+          photo: document.getElementById("editPhoto").value
+        };
+        localStorage.setItem("users", JSON.stringify(users));
+        sendAction(editIndex, "Edited ✏️");
+        renderTable();
+        closeModal();
+      }
+    }
+
+    function closeModal() {
+      document.getElementById("editModal").style.display = "none";
+    }
+
+    function deleteUser(i) {
+      sendAction(i, "Deleted 🗑");
+      users.splice(i, 1);
+      localStorage.setItem("users", JSON.stringify(users));
+      renderTable();
+    }
+
+    renderTable();
+  </script>
+</body>
+</html>
